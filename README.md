@@ -4,6 +4,7 @@ This project demonstrates a typical Android MVVM (Model-View-ViewModel) app usin
 The solution focuses on maintainability, clarity, and ease of testing.
 
 **Explanation of Logic**
+
 **Truecaller15thCharacterRequest :**
 
 This class is responsible for extracting the 15th character from a given text input. It assumes the input is a continuous plain text and returns the character at position 15 (index 14, zero-based). This simple task highlights targeted character access for display or processing.
