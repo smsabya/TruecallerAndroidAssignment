@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TruecallerAndroidAssignment">
         <activity
-            android:name=".presentation.ui.MainActivity"
+            android:name=".presentation.ui.ComposeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

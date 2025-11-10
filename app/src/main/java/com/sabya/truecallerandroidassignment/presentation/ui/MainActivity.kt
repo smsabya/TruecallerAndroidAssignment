@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         mBinding.buttonFetch.setOnClickListener { mViewModel.performTasks() }
 
         // Handle loading, success, and error states
-        mViewModel.state.observe(this) { state ->
+        mViewModel.taskState.observe(this) { state ->
             when (state) {
                 is Resource.Loading -> {
                     mBinding.progressBar.visibility = View.VISIBLE
@@ -60,8 +60,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Observe ViewModel updates
-        mViewModel.result1.observe(this) { mBinding.textView1.text = "15th character: "+ it }
-        mViewModel.result2.observe(this) { mBinding.textView2.text = it }
-        mViewModel.result3.observe(this) { mBinding.textView3.text = it }
+        mViewModel.char15Result.observe(this) { mBinding.char15TextView.text = "15th character: " + it }
+        mViewModel.every15Result.observe(this) { mBinding.every15TextView.text = it }
+        mViewModel.wordCounterResult.observe(this) { mBinding.wordCounterTextView.text = it }
     }
 }

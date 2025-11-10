@@ -9,6 +9,7 @@ import com.sabya.truecallerandroidassignment.domain.usecase.TruecallerEvery15thC
 import com.sabya.truecallerandroidassignment.domain.usecase.TruecallerWordCounterUseCase
 import com.sabya.truecallerandroidassignment.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,43 +26,50 @@ class MainViewModel @Inject constructor(
     private val wordCounterUseCase: TruecallerWordCounterUseCase
 ) : ViewModel() {
 
-    val state = MutableLiveData<Resource<String>>()  // Tracks the main loading/success/error state
-    val result1 = MutableLiveData<String>()
-    val result2 = MutableLiveData<String>()
-    val result3 = MutableLiveData<String>()
+    val taskState =
+        MutableLiveData<Resource<String>>()  // Tracks the main loading/success/error state
+    val char15Result = MutableLiveData<String>()
+    val every15Result = MutableLiveData<String>()
+    val wordCounterResult = MutableLiveData<String>()
+
+    private var fetchJob: Job? = null
 
     /**
      * Fetches the content and processes it for the three tasks.
      * Updates the UI progressively for each stage of result completion.
      */
-    fun performTasks() = viewModelScope.launch {
-        state.postValue(Resource.Loading)
+    fun performTasks() {
+        // Cancel previous job if running when button clicked again
+        fetchJob?.cancel()
+        fetchJob = viewModelScope.launch {
+            taskState.postValue(Resource.Loading)
 
-        when (val response = repository.fetchContent()) {
-            is Resource.Success -> {
-                state.postValue(Resource.Success("Data loaded successfully"))
+            when (val response = repository.fetchContent()) {
+                is Resource.Success -> {
+                    taskState.postValue(Resource.Success("Data loaded successfully"))
 
-                val content = response.data
+                    val content = response.data
 
-                // Run tasks concurrently
-                val task1 = async { char15UseCase(content)?.toString() ?: "N/A" }
-                result1.postValue(task1.await())
+                    // Run tasks concurrently
+                    val char15Task = async { char15UseCase(content)?.toString() ?: "N/A" }
+                    char15Result.postValue(char15Task.await())
 
-                val task2 = async { every15UseCase(content).joinToString(", ") }
-                result2.postValue(task2.await())
+                    val every15Task = async { every15UseCase(content).joinToString(", ") }
+                    every15Result.postValue(every15Task.await())
 
-                val task3 = async {
-                    wordCounterUseCase(content).entries.take(10)
-                        .joinToString("\n") { "${it.key}: ${it.value}" }
+                    val wordCounterTask = async {
+                        wordCounterUseCase(content).entries.take(10)
+                            .joinToString("\n") { "${it.key}: ${it.value}" }
+                    }
+                    wordCounterResult.postValue(wordCounterTask.await())
                 }
-                result3.postValue(task3.await())
-            }
 
-            is Resource.Error -> {
-                state.postValue(Resource.Error(response.message))
-            }
+                is Resource.Error -> {
+                    taskState.postValue(Resource.Error(response.message))
+                }
 
-            else -> Unit
+                else -> Unit
+            }
         }
     }
 }
